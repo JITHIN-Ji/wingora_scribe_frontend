@@ -113,12 +113,12 @@ export const api = {
     return res.data;
   },
 
-  async getPatientSoapRecords(patientId: number): Promise<{
+  async getPatientSoapRecords(patientId: string | number): Promise<{
     status: string;
-    patient_id: number;
+    patient_id: string;
     soap_records: Array<{
-      id: number;
-      patient_id: number;
+      id: string;
+      patient_id: string;
       audio_file_name: string;
       storage_path?: string;
       transcript: string;

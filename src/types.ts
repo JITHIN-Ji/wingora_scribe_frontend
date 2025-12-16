@@ -57,7 +57,7 @@ export type UserChatResponse = {
 };
 
 export type Patient = {
-  id: number;
+  id: string;
   name: string;
   address?: string;
   phone_number?: string;
