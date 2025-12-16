@@ -259,7 +259,7 @@ export function Doctor() {
   const loadSoapHistory = async (patientId: string) => {
     setLoadingHistory(true);
     try {
-      const response = await api.getPatientSoapRecords(patientId);
+      const response = await api.getPatientSoapRecords(Number(patientId));
       if (response.status === 'success' && response.soap_records) {
         
         const normalized = response.soap_records.map((r: any) => {

@@ -10,7 +10,7 @@ import type {
   PatientResponse 
 } from '../types';
 
-const baseURL = (import.meta as any).env?.VITE_API_URL || 'https://test-acu-backend-ggfjf6bpasgtb9fz.canadacentral-01.azurewebsites.net';
+const baseURL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
 
 const useProxy = false; 
 
@@ -113,12 +113,12 @@ export const api = {
     return res.data;
   },
 
-  async getPatientSoapRecords(patientId: string | number): Promise<{
+  async getPatientSoapRecords(patientId: number): Promise<{
     status: string;
-    patient_id: string;
+    patient_id: number;
     soap_records: Array<{
-      id: string;
-      patient_id: string;
+      id: number;
+      patient_id: number;
       audio_file_name: string;
       storage_path?: string;
       transcript: string;
