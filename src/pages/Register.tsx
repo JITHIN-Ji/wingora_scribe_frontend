@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { authApi } from '../api/client';
+import { hashPasswordForTransmission } from '../utils/passwordHash';
 
 export function Register(){
   const navigate = useNavigate();
@@ -36,7 +37,9 @@ export function Register(){
 
     setIsLoading(true);
     try{
-      const res = await authApi.register(email, password, name);
+      // Hash password on client side before sending
+      const passwordHash = await hashPasswordForTransmission(password);
+      const res = await authApi.register(email, passwordHash, name);
       if(res.status === 'success'){
         setMessage('Registered successfully. Redirecting to sign in...');
         

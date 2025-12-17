@@ -2,6 +2,7 @@ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
+import { hashPasswordForTransmission } from '../utils/passwordHash';
 
 export function Login() {
   const navigate = useNavigate();
@@ -44,7 +45,9 @@ export function Login() {
     setError('');
     setIsLoading(true);
     try{
-      const data = await (await import('../api/client')).authApi.emailLogin(email, password);
+      // Hash password on client side before sending
+      const passwordHash = await hashPasswordForTransmission(password);
+      const data = await (await import('../api/client')).authApi.emailLogin(email, passwordHash);
       if(data.status === 'success' && data.user){
         login(data.user);
         navigate('/');
