@@ -1,14 +1,4 @@
-/**
- * Client-side password hashing utility
- * Uses Web Crypto API to hash passwords before sending to server
- * This prevents passwords from being visible in plain text in network requests
- * 
- * Security approach:
- * 1. Client hashes password with SHA-256
- * 2. Sends hash to server (not plain password)
- * 3. Server hashes the received hash again with PBKDF2 before storing/comparing
- * 4. This ensures plain password never leaves the client
- */
+
 
 /**
  * Hash a password using SHA-256 for secure transmission
