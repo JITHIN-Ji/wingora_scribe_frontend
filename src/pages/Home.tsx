@@ -57,7 +57,7 @@ export function Home() {
       <div className="left-section">
         <div className="hero">
           <div className="hero-content">
-            <h1>Acucogn Ambient Scribe</h1>
+            <h1>Wingora Ambient Scribe</h1>
             <p className="subtle subtitle-prominent">Let Doctors talk. We handle notes.</p>
           </div>
         </div>

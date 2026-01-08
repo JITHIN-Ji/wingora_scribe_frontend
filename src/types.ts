@@ -4,18 +4,18 @@ export type RootResponse = {
 
 export type ProcessAudioResponse = {
   transcript: string;
-  original_transcript?: string | null;  // Original transcript for Option 1 (real-time)
+  original_transcript?: string | null;  
   diarized_segments: unknown;
   soap_sections: Record<string, unknown> | string;
   audio_file_name: string;
-  soap_record_id?: number;  // Database record ID if saved
+  soap_record_id?: number;  
 };
 
 export type ApprovePlanPayload = {
   plan_section: string;
   user_email?: string;
   send_email?: boolean;
-  email_content?: string; // Doctor's edited email content
+  email_content?: string; 
 };
 
 export type ApprovePlanResponse = {

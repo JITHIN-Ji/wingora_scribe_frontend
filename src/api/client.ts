@@ -10,7 +10,7 @@ import type {
   PatientResponse 
 } from '../types';
 
-const baseURL = (import.meta as any).env?.VITE_API_URL || 'https://acucogn-scribe-api-d9h5a7gzepd3dtg2.centralus-01.azurewebsites.net';
+const baseURL = (import.meta as any).env?.VITE_API_URL || 'http://127.0.0.1:8000';
 
 const useProxy = false; 
 
@@ -61,18 +61,6 @@ export const authApi = {
 
   async logout(): Promise<{ status: string; message: string }> {
     const res = await instance.post('/auth/logout');
-    return res.data;
-  },
-
-  async register(email: string, password: string, name?: string): Promise<{ status: string; message: string }>{
-    const res = await instance.post('/auth/register', { email, password, name });
-    return res.data;
-  },
-
-
-
-  async emailLogin(email: string, password: string): Promise<{ status: string; user?: { email: string; name: string; picture: string } }>{
-    const res = await instance.post('/auth/login', { email, password });
     return res.data;
   },
 };

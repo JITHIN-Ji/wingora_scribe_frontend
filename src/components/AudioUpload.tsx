@@ -28,7 +28,7 @@ export function AudioUpload({ onProcessed, patientId }: Props) {
     }
     try {
       setLoading(true);
-      // Request diarization correction for uploaded audio as well
+      
       const res = await api.processAudio(file, true, patientId ? Number(patientId) : undefined);
       setResult(res);
       onProcessed?.(res);
