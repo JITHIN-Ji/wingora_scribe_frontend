@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../api/client';
+import type { Patient } from '../types';
 
 
 function usePageBackground(className: string) {
@@ -33,6 +34,13 @@ export function User() {
     A: '',
     P: '',
   });
+
+  // New state: patients and selection
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<string>('');
+  const [soapLoading, setSoapLoading] = useState<boolean>(false);
+  const [statusMessage, setStatusMessage] = useState<string>('');
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -41,6 +49,55 @@ export function User() {
       timestamp: new Date(),
     },
   ]);
+
+  // Load patients on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const resp = await api.getPatients();
+        console.debug('User.loadPatients response:', resp);
+        const list = resp?.patients || [];
+        setPatients(list);
+      } catch (err) {
+        console.error('Error loading patients for User page:', err);
+      }
+    })();
+  }, []);
+
+  // Load SOAP when a patient is selected
+  useEffect(() => {
+    if (!selectedPatient) return;
+    (async () => {
+      setSoapLoading(true);
+      setStatusMessage('');
+      try {
+        const resp = await api.getPatientSoapRecords(Number(selectedPatient));
+        if (resp?.status === 'success' && Array.isArray(resp.soap_records) && resp.soap_records.length > 0) {
+          const first = resp.soap_records[0];
+          let sections: any = first.soap_sections || {};
+          if (typeof sections === 'string') {
+            try { sections = JSON.parse(sections); } catch { sections = {}; }
+          }
+          setSoapData({
+            S: sections.S || sections.Subjective || sections.subjective || '',
+            O: sections.O || sections.Objective || sections.objective || '',
+            A: sections.A || sections.Assessment || sections.assessment || '',
+            P: sections.P || sections.Plan || sections.plan || '',
+          });
+          setStatusMessage(`✅ Loaded latest SOAP (created: ${first.created_at || 'unknown'})`);
+        } else {
+          setSoapData({ S: '', O: '', A: '', P: '' });
+          setStatusMessage('No SOAP records found for this patient.');
+        }
+      } catch (err) {
+        console.error('Error loading SOAP for patient:', err);
+        setSoapData({ S: '', O: '', A: '', P: '' });
+        setStatusMessage('Failed to load SOAP records.');
+      } finally {
+        setSoapLoading(false);
+      }
+    })();
+  }, [selectedPatient]);
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -149,38 +206,67 @@ export function User() {
         {/* Left Side - SOAP Summary */}
         <section className="card">
           <h3>Latest SOAP Summary</h3>
-          {soapData.S || soapData.O || soapData.A || soapData.P ? (
-            <div className="soap-display-section" style={{ marginTop: 16 }}>
-              <div className="card-mini">
-                <h4>S - Subjective</h4>
-                <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                  {soapData.S || 'No data available'}
-                </p>
+
+          {/* Patient selector */}
+          <div style={{ marginTop: 8 }}>
+            <select
+              value={selectedPatient}
+              onChange={(e) => setSelectedPatient(e.target.value)}
+              className="input"
+              style={{ minWidth: '220px', maxWidth: '100%', padding: '10px 12px', color: '#000' }}
+            >
+              <option value="" style={{ color: 'var(--text)' }}>-- Select a Patient --</option>
+              {patients.map((p) => (
+                <option key={p.id} value={String(p.id)} style={{ color: '#000' }}>
+                  {p.name || `Patient #${p.id} (Unnamed)`}
+                </option>
+              ))}
+            </select>
+            {statusMessage && (
+              <div style={{ marginTop: 8, color: soapLoading ? 'var(--text)' : '#70d6ff' }}>{statusMessage}</div>
+            )}
+          </div>
+
+          {soapLoading ? (
+            <p className="subtle" style={{ marginTop: 16 }}>Loading SOAP summary...</p>
+          ) : (selectedPatient ? (
+            soapData.S || soapData.O || soapData.A || soapData.P ? (
+              <div className="soap-display-section" style={{ marginTop: 16 }}>
+                <div className="card-mini">
+                  <h4>S - Subjective</h4>
+                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {soapData.S || 'No data available'}
+                  </p>
+                </div>
+                <div className="card-mini">
+                  <h4>O - Objective</h4>
+                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {soapData.O || 'No data available'}
+                  </p>
+                </div>
+                <div className="card-mini">
+                  <h4>A - Assessment</h4>
+                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {soapData.A || 'No data available'}
+                  </p>
+                </div>
+                <div className="card-mini">
+                  <h4>P - Plan</h4>
+                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {soapData.P || 'No data available'}
+                  </p>
+                </div>
               </div>
-              <div className="card-mini">
-                <h4>O - Objective</h4>
-                <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                  {soapData.O || 'No data available'}
-                </p>
-              </div>
-              <div className="card-mini">
-                <h4>A - Assessment</h4>
-                <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                  {soapData.A || 'No data available'}
-                </p>
-              </div>
-              <div className="card-mini">
-                <h4>P - Plan</h4>
-                <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                  {soapData.P || 'No data available'}
-                </p>
-              </div>
-            </div>
+            ) : (
+              <p className="subtle" style={{ marginTop: 16 }}>
+                No SOAP records for the selected patient.
+              </p>
+            )
           ) : (
             <p className="subtle" style={{ marginTop: 16 }}>
-              No SOAP summary available. Please visit the Doctor Portal to generate a summary.
+              Select a patient to view their SOAP summary.
             </p>
-          )}
+          ))}
 
           {/* Important Message Box - Appointment Details Only */}
           {soapData.P && (() => {

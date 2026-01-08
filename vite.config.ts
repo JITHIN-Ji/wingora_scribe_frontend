@@ -1,19 +1,11 @@
-import { defineConfig } from 'vite';
-
-
-const apiTarget = process.env.VITE_API_BASE_URL || 'https://web-application-voice-assitant.onrender.com';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  plugins: [react()],
   server: {
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: apiTarget,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
-});
-
-
+    allowedHosts: [
+      'supercriminally-ununified-arnoldo.ngrok-free.dev'
+    ]
+  }
+})
